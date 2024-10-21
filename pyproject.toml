@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "hr_budget_bot"
+version = "0.1.0"
+description = ""
+authors = ["Иван Шелухин <ishelukhin@tennisi.it>"]
+readme = "README.md"
+
+packages = [
+    { include = "marketing_budget_bot", from = ".." },
+    { include = "db", from = "." },
+    { include = "helper", from = "." },
+    { include = "src", from = "." }
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+asyncpg = "^0.29.0"
+python-telegram-bot = "^21.6"
+python-dotenv = "^1.0.1"
+gspread-asyncio = "^2.0.0"
+pytz = "^2024.2"
+pandas = "^2.2.3"
+google-oauth2-tool = "^0.0.3"
+flask = "^3.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -11,7 +11,7 @@ class Config:
     telegram_bot_token: str = getenv("TELEGRAM_BOT_TOKEN")
     google_sheets_spreadsheet_id: str = getenv("GOOGLE_SHEETS_SPREADSHEET_ID")
     db_host: str = getenv("DB_HOST")
-    db_port: int = int(getenv("DB_PORT", 5432))
+    db_port: int = int(getenv("DB_PORT", 5433))
     db_name: str = getenv("DB_NAME")
     db_user: str = getenv("DB_USER")
     db_password: str = getenv("DB_PASSWORD")

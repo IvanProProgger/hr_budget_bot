@@ -25,15 +25,21 @@ async def initiator_to_head_start_message(
     initiator_chat_id = update.effective_chat.id
     department = "initiator"
     stage = "initiator_to_head"
-    await message_manager.update_data(
-        row_id,
-        {"initiator_messages": context.bot_data.get("initiator_message")},
-    )
-    del context.bot_data["initiator_message"]
-    try:
-        await message_manager.resend_messages_with_tracking(
-            context, row_id, department, stage
+    if context.bot_data.get("initiator_message"):
+        await message_manager.update_data(
+            row_id,
+            {"initiator_messages": context.bot_data.get("initiator_message")},
         )
+        del context.bot_data["initiator_message"]
+    try:
+        if message_manager[row_id].get("initiator_messages"):
+            await message_manager.resend_messages_with_tracking(
+                context, row_id, department, stage, reply_markup=None
+            )
+        else:
+            await message_manager.send_messages_with_tracking(
+                context, row_id, "initiator", initiator_chat_id, "initiator_to_head"
+            )
     except Exception as e:
         raise RuntimeError(f"Ошибка при изменении сообщения в чате с инициатором: {e}")
 

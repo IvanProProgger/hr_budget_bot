@@ -53,8 +53,8 @@ async def construct_rows(
         [
             today_date,
             rounded_sum,
-            payment_info["expense_item"],
-            payment_info["expense_group"],
+            payment_info["item"],
+            payment_info["groupment"],
             "",
             "",
             payment_info["comment"],

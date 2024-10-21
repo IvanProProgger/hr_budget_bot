@@ -19,9 +19,9 @@ from src.handlers import (
     show_not_paid_command,
     approve_record_command,
     reject_record_command,
-    check_status,
+    check_status_command,
     error_callback,
-    check_access,
+    check_access_command,
 )
 from telegram.ext import (
     Application,
@@ -64,15 +64,15 @@ def main() -> None:
     """Основная функция для запуска бота."""
     application = Application.builder().token(Config.telegram_bot_token).build()
 
-    application.add_handler(
-        MessageHandler(~filters.User(user_id=Config.white_list), check_access)
-    )
+    # application.add_handler(
+    #     MessageHandler(~filters.User(user_id=Config.white_list), check_access_command)
+    # )
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("submit_record", submit_record_command))
     application.add_handler(CommandHandler("reject_record", reject_record_command))
     application.add_handler(CommandHandler("approve_record", approve_record_command))
     application.add_handler(CommandHandler("show_not_paid", show_not_paid_command))
-    application.add_handler(CommandHandler("check", check_status))
+    application.add_handler(CommandHandler("check", check_status_command))
     application.add_handler(
         CallbackQueryHandler(approval_handler, pattern="^approval_.*")
     )
@@ -107,7 +107,7 @@ def main() -> None:
 if __name__ == "__main__":
     from threading import Thread
 
-    flask_thread = Thread(target=app.run, kwargs={"host":"0.0.0.0", "port": 8080, "debug": False})
+    flask_thread = Thread(target=app.run, kwargs={"host":"0.0.0.0", "port": 8090, "debug": False})
     flask_thread.start()
 
     main()

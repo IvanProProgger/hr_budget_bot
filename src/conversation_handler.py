@@ -6,7 +6,7 @@ from telegram.ext import ConversationHandler, ContextTypes
 from config.config import Config
 from helper.logging_config import logger
 from helper.user_data import get_nickname
-from helper.utils import validate_period_dates, create_keyboard
+from helper.utils import validate_period_dates
 from src.handlers import submit_record_command
 from src.sheets import GoogleSheetsManager
 
@@ -141,7 +141,9 @@ async def input_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     query = update.callback_query
     context.user_data["group"] = context.user_data["groups"][int(query.data)]
     logger.info(f"Выбрана группа расхода: {context.user_data["group"]}")
-    await query.edit_message_text(f"Выбрана группа расхода: {context.user_data["group"]}")
+    await query.edit_message_text(
+        f"Выбрана группа расхода: {context.user_data["group"]}"
+    )
 
     del context.user_data["options"]
     del context.user_data["groups"]
@@ -180,7 +182,9 @@ async def input_comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         context.user_data["enter_comment_message_id"] = bot_message.message_id
         return INPUT_COMMENT
 
-    await update.message.reply_text(f"Введён комментарий: {context.user_data["comment"]}")
+    await update.message.reply_text(
+        f"Введён комментарий: {context.user_data["comment"]}"
+    )
     bot_message = await context.bot.send_message(
         chat_id=context.user_data["initiator_chat_id"],
         text='Введите месяц и год начисления счёта строго через пробел в формате mm.yy (Например:\n "09.22 11.22"):',
@@ -313,6 +317,22 @@ async def confirm_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         logger.info(f"Ввод счёта отменён инициатором @{query.from_user.username}")
         await stop_dialog(update, context)
         return ConversationHandler.END
+
+
+async def create_keyboard(massive: list[str]) -> InlineKeyboardMarkup:
+    """
+    Создает клавиатуру с кнопками, имеющими названия элементов массива, располагая их горизонтально.
+
+    :param massive: Список строк для кнопок
+    :return: InlineKeyboardMarkup объект
+    """
+
+    keyboard = []
+    for number, item in enumerate(massive):
+        button = InlineKeyboardButton(item, callback_data=number)
+        keyboard.append([button])
+
+    return InlineKeyboardMarkup(keyboard)
 
 
 async def stop_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

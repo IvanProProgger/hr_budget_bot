@@ -71,10 +71,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             "<i>1) Сумма счёта</i>\n"
             "<i>2) Статья расхода</i>\n"
             "<i>3) Группа расхода</i>\n"
-            "<i>4) Партнёр</i>\n"
-            "<i>5) Дата оплаты и дата начисления платежа через пробел</i>\n"
-            "<i>6) Форма оплаты</i>\n"
-            "<i>7) Комментарий к платежу</i>\n\n"
+            "<i>4) Дата оплаты и дата начисления платежа через пробел</i>\n"
+            "<i>5) Форма оплаты</i>\n"
+            "<i>6) Комментарий к платежу</i>\n\n"
             # "<i>Каждый пункт необходимо указывать строго через запятую.</i>\n\n"
             f"<b>Команды бота:</b>\n\n"
             "<i>/check <b>ID</b> - Узнать о статусе интересующего платежа</i>\n\n"
@@ -127,11 +126,10 @@ async def process_input(
         record_dict = {
             "amount": float(user_args[0]),
             "item": user_args[1],
-            "group": user_args[2],
-            "partner": user_args[3],
-            "comment": user_args[4],
-            "period": await validate_period_dates(user_args[5]),
-            "payment_method": user_args[6],
+            "groupment": user_args[2],
+            "comment": user_args[3],
+            "period": await validate_period_dates(user_args[4]),
+            "payment_method": user_args[5],
             "approvals_needed": 1 if float(user_args[0]) < 50000 else 2,
             "approvals_received": 0,
             "status": "Not processed",

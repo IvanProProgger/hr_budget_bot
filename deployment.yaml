@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hr-budget-bot-deployment
+  namespace: bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hr-budget-bot
+  template:
+    metadata:
+      labels:
+        app: hr-budget-bot
+    spec:
+      imagePullSecrets:
+        - name: tennisi-registry-credentials
+      containers:
+      - name: hr-budget-bot
+        image: registry.tennisi.it/bot/hr-budget-bot:{BOT_VERSION}
+        ports:
+        - containerPort: 8090
+        envFrom:
+        - configMapRef:
+            name: hr-budget-bot-config
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: bot.budget-bot-db.credentials.postgresql.acid.zalan.do
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bot.budget-bot-db.credentials.postgresql.acid.zalan.do
+              key: password
+        - name: TELEGRAM_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hr-budget-bot-secret
+              key: TELEGRAM_BOT_TOKEN
+        - name: GOOGLE_SHEETS_CREDENTIALS_FILE
+          valueFrom:
+            secretKeyRef:
+              name: hr-budget-bot-secret
+              key: GOOGLE_SHEETS_CREDENTIALS_FILE
+        volumeMounts:
+        - name: temp-dir
+          mountPath: /app/logs  # Путь внутри контейнера для временных данных
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8090
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8090
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: temp-dir
+        emptyDir: {}
+#        volumeMounts:
+#        - name: secret-volume
+#          mountPath: /app/secrets
+#      volumes:
+#      - name: secret-volume
+#        secret:
+#          secretName: hr-budget-bot-secret

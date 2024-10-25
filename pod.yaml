@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hr-budget-bot-pod
+spec:
+  containers:
+  - name: hr-budget-bot
+    image: hr_budget_bot-budget-bot:latest
+    ports:
+    - containerPort: 8090

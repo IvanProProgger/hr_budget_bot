@@ -144,12 +144,10 @@ async def get_chat_id_by_payment_method(
     :raises RuntimeError: При отсутствии сотрудника для данной операции
     """
 
-    if payment_method in ("нал", "крипта"):
-        chat_id = ["594336984"]
+    if payment_method in ("нал", "карта"):
+        chat_id = ["455256941", "427967346"]
     elif payment_method == "безнал":
-        chat_id = ["594336984"]
-    elif payment_method == "карта":
-        chat_id = ["594336984"]
+        chat_id = ["427967346", "939635840", "5024126966"]
 
     if not chat_id:
         raise RuntimeError("Не найден сотрудник для данной операции")

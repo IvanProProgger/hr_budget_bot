@@ -1,0 +1,100 @@
+---
+version: 2
+plan:
+  project-key: BOT
+  key: MBB
+  name: hr-budget-bot
+  master-branch: main
+stages:
+  - Build:
+      manual: false
+      final: true
+      jobs:
+        - Build and create release
+Build and create release:
+  key: BLD
+  other:
+    clean-working-dir: true
+  requirements:
+    - operating.system: linux
+    - system.docker.executable
+    - system.builder.gitversion.GitVersion
+    - system.builder.octopuscli.Octo
+  tasks:
+    - checkout:
+        force-clean-build: true
+    - script:
+        interpreter: SHELL
+        scripts:
+          - |-
+            #!/usr/bin/bash
+            gitversion >gitversion.txt
+            sed -i '1d;$ d;s/  //;s/"//g;s/,//;s/: /=/' gitversion.txt
+    - inject-variables:
+        file: gitversion.txt
+        scope: LOCAL
+        namespace: GitVersion
+    - script:
+        interpreter: SHELL
+        scripts:
+          - |-
+            #!/usr/bin/bash
+
+            set -e
+            set -x
+            
+            version=${bamboo.GitVersion.SemVer}.${bamboo.buildNumber}
+            chartVersion=${bamboo.GitVersion.FullSemVer}
+            
+            image_name=${bamboo.registryUrl}/bot/hr-budget-bot:${version}
+
+            echo "${bamboo.registryPassword}" | docker login -u '${bamboo.registryUsername}' --password-stdin "${bamboo.registryUrl}"
+
+            docker build \
+            -t "${image_name}" \
+            -f Dockerfile .
+
+            docker push -q "${image_name}"
+
+            docker logout "${bamboo.registryUrl}"
+            
+            sed -i "s/{BOT_VERSION}/${version}/g" "deployment.yaml"
+            
+            mkdir -p ./deploy/charts/
+            tar -czvf ./deploy/charts/hr-budget-bot-chart-${chartVersion}.tgz configmap.yaml deployment.yaml secret.yaml 
+            
+            octo push \
+            --package "./deploy/charts/hr-budget-bot-chart-${chartVersion}.tgz" \
+            --server ${bamboo.OctopusServerUrl} \
+            --apiKey ${bamboo.OctopusServerApiPassword} \
+            --replace-existing
+            
+            octo create-release \
+            --server ${bamboo.OctopusServerUrl} \
+            --apiKey ${bamboo.OctopusServerApiPassword} \
+            --project hr-budget-bot \
+            --version ${version} \
+            --package "hr-budget-bot-chart:${chartVersion}"
+
+#            octo create-release \
+#            --server ${bamboo.OctopusServerUrl} \
+#            --apiKey ${bamboo.OctopusServerApiPassword} \
+#            --project Hr Budget Bot \
+#            --channel rke \
+#            --version "${version}-rke" \
+#            --package "hr-budget-bot-chart:${chartVersion}"
+variables:
+  registryUrl: registry.tennisi.it
+  registryUsername: robot$bot+bot-bamboo
+  registryPassword: BAMSCRT@0@0@wScAJB3D4lz6hOWSm01+8Dw/oNWKoWiMvvBF3LBusdx/1U+KLuAkxpqfAELSsnFN
+
+repositories:
+  - Hr-budget-bot:
+      scope: global
+dependencies:
+  require-all-stages-passing: false
+  enabled-for-branches: false
+  block-strategy: none
+  plans: [ ]
+other:
+  concurrent-build-plugin: system-default
